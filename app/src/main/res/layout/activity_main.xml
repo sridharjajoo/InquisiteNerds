@@ -5,12 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.sridh.beaconrevised.MainActivity">
+    tools:context="com.example.sridh.inquisitenerds.MainActivity">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/text_view"
-        android:textSize="36sp"
+        android:textSize="24sp"
         />
 </LinearLayout>
