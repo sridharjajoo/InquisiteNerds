@@ -1,7 +1,9 @@
 package com.example.sridh.inquisitenerds;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.speech.tts.TextToSpeech;
@@ -14,6 +16,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.example.sridh.inquisitenerds.database.NerdsContract;
+import com.example.sridh.inquisitenerds.database.NerdsDatabase;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -39,7 +44,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private  ListView listView;
     private TextToSpeech t1;
     private Button play;
-    private int i=0;
+    private int i=0,j=0;
+    private Button call;
+    private SQLiteDatabase db;
+    private NerdsDatabase dbhelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +55,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         setContentView(R.layout.activity_main);
 
         play = (Button) findViewById(R.id.replay_button);
+        call = (Button) findViewById(R.id.call_button);
+
+        dbhelper = new NerdsDatabase(this);
+        db = dbhelper.getWritableDatabase();
+
         t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -77,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     @Override
     public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
         final Collection<Beacon> beacons1=beacons;
-
+        j=0;
         for (Beacon beacon : beacons) {
       //      if (beacon.getServiceUuid() == 0xfeaa && beacon.getBeaconTypeCode() == 0x00) {
                 // This is a Eddystone-UID frame
@@ -85,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
             final String namespace =namespaceId.toString();
             Log.d(TAG, "String I see a beacon transmitting namespace id: " + namespace );
 
-
+            ContentValues values = new ContentValues();
             final Identifier instanceId = beacon.getId2();
             final String instance =instanceId.toString();
             if(beacons.size()>0) {
@@ -94,66 +107,88 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                     runOnUiThread(new Runnable() {
                         public void run() {
                             // startActivity(new Intent(MainActivity.this,Main2Activity.class));
-                            ((TextView) MainActivity.this.findViewById(R.id.text_view)).setText("The beacon detected has namespaceId = " +namespace
-                            + "You are at the first beacon");}});
+                            ((TextView) MainActivity.this.findViewById(R.id.text_view)).setText("You are at the first beacon . Move towards Left to encounter 2nd Beacon");}});
 
                     if(i==0) {
                         //Toast.makeText(getApplicationContext(), toSpeak,Toast.LENGTH_SHORT).show();
-                        String speech = "if you press right you can play the directions again,if you press left you can call helpline ";
+                        String speech = "You are at the first beacon! To replay press the left button and to call helpline press the right button";
                         //text_View.setText(speech);
                         t1.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
+                        values.put(NerdsContract.NerdsEntry.COLUMN_BEACON,"Checked in at 1st beacon");
                         i=1;
+
+
                     }
+
+                    call.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+
+                            Intent callIntent = new Intent(Intent.ACTION_CALL);
+                            callIntent.setData(Uri.parse("tel:9899012345"));
+                            startActivity(callIntent);
+                        }
+                    });
+
                     play.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             //String toSpeak = ed1.getText().toString();
                             //Toast.makeText(getApplicationContext(), toSpeak,Toast.LENGTH_SHORT).show();
-                            String speech="if you press right you can play the directions again,if you press left you can call helpline ";
+                            String speech="You are at the first beacon";
                             //text_View.setText(speech);
                             t1.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
                         }
                     });
-                          //  list.add("You are tat the first beacon");
-                          //  adapter.notifyDataSetChanged();
-                          //  listView.setAdapter(adapter);
-                      //      mBeaconManager.unbind(MainActivity.this);
-//                        adapter.notifyDataSetChanged();
-
-
-
-                        }
-
-
-
-                    }
+                }
+   }
 
 
 
                 if (namespace.compareTo("0x524cba7394a8fb191969") == 0 && instance.compareTo("0x000000000000") == 0) {
-                    mBeaconManager.bind(MainActivity.this);
 
                     runOnUiThread(new Runnable() {
                         public void run() {
                             // startActivity(new Intent(MainActivity.this,Main2Activity.class));
-                            //((TextView) MainActivity.this.findViewById(R.id.text_view)).setText("The beacon detected has namespaceId = " +namespace
-                            //       + "You are at the second beacon");}});
+                            ((TextView) MainActivity.this.findViewById(R.id.text_view)).setText("You are at the second beacon . Move towards Right to encounter 3rd Beacon");}});
 
-                            // list.add("You are tat the second beacon");
-                            // adapter.notifyDataSetChanged();
-                            // listView.setAdapter(adapter);
-                            // mBeaconManager.unbind(MainActivity.this); }
-                        }});}
-                }
+                    if(j==0) {
+                        //Toast.makeText(getApplicationContext(), toSpeak,Toast.LENGTH_SHORT).show();
+                        String speech = "You are at the second beacon! To replay press the left button and to call helpline press the right button";
+                        //text_View.setText(speech);
+                        t1.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
+                        values.put(NerdsContract.NerdsEntry.COLUMN_BEACON,"Checked in at 2nd beacon");
+                        j=1;
+                        i=0;
+                    }
 
-            }
+                    call.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
 
 
+                            Intent callIntent = new Intent(Intent.ACTION_CALL);
+                            callIntent.setData(Uri.parse("tel:9899012345"));
+                            startActivity(callIntent);
+                        }
+                    });
 
+                    play.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String speech="You are at the first beacon";
+                            t1.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
+                        }
+                    });
+               }
+        }
+    }
 
-    @Override
-    public void onPause() {
+   @Override
+   public void onPause() {
         super.onPause();
         mBeaconManager.unbind(this);
-    }
+   }
+
 }
