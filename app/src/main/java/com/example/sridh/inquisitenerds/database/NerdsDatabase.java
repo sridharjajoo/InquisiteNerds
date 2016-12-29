@@ -24,7 +24,7 @@ public class NerdsDatabase extends SQLiteOpenHelper {
         final String SQL_CREATE_STRING="CREATE TABLE " + NerdsContract.NerdsEntry.TABLE_NAME + " ("
                 + NerdsContract.NerdsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + NerdsContract.NerdsEntry.COLUMN_BEACON + " TEXT " + ");";
-sqLiteDatabase.execSQL(DATABASE_NAME);
+    sqLiteDatabase.execSQL(SQL_CREATE_STRING);
     }
 
     @Override

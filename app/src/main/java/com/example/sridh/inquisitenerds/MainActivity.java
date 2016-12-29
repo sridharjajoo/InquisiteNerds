@@ -11,6 +11,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -34,6 +38,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import static com.example.sridh.inquisitenerds.database.NerdsContract.NerdsEntry.TABLE_NAME;
 import static org.altbeacon.beacon.service.BeaconService.TAG;
 
 public class MainActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier {
@@ -44,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private  ListView listView;
     private TextToSpeech t1;
     private Button play;
-    private int i=0,j=0;
+    private int i=0,j=0,k=0;
     private Button call;
     private SQLiteDatabase db;
     private NerdsDatabase dbhelper;
@@ -115,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                         //text_View.setText(speech);
                         t1.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
                         values.put(NerdsContract.NerdsEntry.COLUMN_BEACON,"Checked in at 1st beacon");
+                        db.insert(NerdsContract.NerdsEntry.TABLE_NAME, null, values);
                         i=1;
 
 
@@ -159,8 +165,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                         //text_View.setText(speech);
                         t1.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
                         values.put(NerdsContract.NerdsEntry.COLUMN_BEACON,"Checked in at 2nd beacon");
+                        db.insert(NerdsContract.NerdsEntry.TABLE_NAME, null, values);
+
                         j=1;
-                        i=0;
                     }
 
                     call.setOnClickListener(new View.OnClickListener() {
@@ -182,6 +189,44 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                         }
                     });
                }
+
+            if (namespace.compareTo("0x9cb6e329d950506df137") == 0 && instance.compareTo("0x000000000000") == 0) {
+
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        // startActivity(new Intent(MainActivity.this,Main2Activity.class));
+                        ((TextView) MainActivity.this.findViewById(R.id.text_view)).setText("You are at the third beacon . Move towards Right to encounter further Beacon");}});
+
+                if(k==0) {
+                    //Toast.makeText(getApplicationContext(), toSpeak,Toast.LENGTH_SHORT).show();
+                    String speech = "You are at the third beacon! To replay press the left button and to call helpline press the right button";
+                    //text_View.setText(speech);
+                    t1.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
+                    values.put(NerdsContract.NerdsEntry.COLUMN_BEACON,"Checked in at 3rd beacon");
+                    db.insert(NerdsContract.NerdsEntry.TABLE_NAME, null, values);
+
+                    k=1;
+                }
+
+                call.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+
+                        Intent callIntent = new Intent(Intent.ACTION_CALL);
+                        callIntent.setData(Uri.parse("tel:9899012345"));
+                        startActivity(callIntent);
+                    }
+                });
+
+                play.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String speech="You are at the third beacon";
+                        t1.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
+                    }
+                });
+            }
         }
     }
 
@@ -191,4 +236,24 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         mBeaconManager.unbind(this);
    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu,menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    int item_id = item.getItemId();
+        if(item_id==R.id.new_subject)
+        {
+            startActivity(new Intent(MainActivity.this,MenuActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+
+    }
 }
+
